@@ -62,10 +62,11 @@ const updateTime = async (start, end) => {
 const loadConfigStr = async () => {
   const configPath = path.join(process.env.HOME, 'Library', 'Preferences', CONFIG_FILE);
   try {
-    await fs.access(configPath, constants.R_OK | constants.W_OK);
+    await fs.access(configPath, fs.constants.R_OK | fs.constants.W_OK);
     const data = await fs.readFile(configPath);
     return data.toString();
   } catch (err) {
+    console.log('error is', err);
     return '23:59';
   }
 }
