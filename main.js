@@ -31,10 +31,39 @@ function sleep(ms) {
 
 const speak = async (str, chineseVoiceName, rate) => {
   const args = ['-v', `${chineseVoiceName}`, '-r', `${rate}`, `${str}`];
-  await spawn('say', args);
+  try {
+    await spawn('say', args);
+  } catch (err) {
+    console.log(err.stderr.toString());
+    throw err;
+  }
 };
 
-const updateTime = async (start, end) => {
+const retrieveChineseVoiceName = async () => {
+  const args = ['-v', '?'];
+  let out;
+  try {
+    out = await spawn('say', args);
+  } catch (err) {
+    console.log(err.stderr.toString());
+    throw err;
+  }
+  const lines = out.toString().split('\n');
+  for (let i = 0; i < lines.length; ++i) {
+    const line = lines[i];
+    const arr = line.split(/\s+/);
+    if (arr.length < 2) {
+      continue;
+    }
+    if (arr[1].startsWith('zh_CN')) {
+      console.log('Chinese voice name is', arr[0]);
+      return arr[0];
+    }
+  }
+  throw new Error('Failed to fetch Chinese voice name');
+};
+
+const updateTime = async (start, end, chineseVoiceName) => {
   const currentConfigFileChanges = configFileChanges;
   for (; ;) {
     if (currentConfigFileChanges != configFileChanges) {
@@ -47,14 +76,14 @@ const updateTime = async (start, end) => {
       continue;
     }
     if (now.getTime() > end.getTime()) {
-      await speak(`计时结束`, 'Ting-Ting', '24')
+      await speak(`计时结束`, chineseVoiceName, '24')
       return true;
     }
     const nowStr = toDateString(now);
     if (last != nowStr) {
       last = nowStr;
       mainWindow.webContents.send("time:update", toDateString(now));
-      await speak(`${now.getSeconds()}`, 'Ting-Ting', '300')
+      await speak(`${now.getSeconds()}`, chineseVoiceName, '300')
     }
   }
 };
@@ -125,10 +154,11 @@ const fixDate = (date, hourMinuteStr) => {
 };
 
 const run = async () => {
+  const chineseVoiceName = await retrieveChineseVoiceName();
   const { start, end } = await loadConfig();
   const timeRangeStr = `${toDateString(start)}到${toDateString(end)}`;
-  mainWindow.webContents.send("timeRange:update", timeRangeStr);
-  updateTime(start, end);
+  mainWindow.webContents.send("timeRange:update", {timeRangeStr, chineseVoiceName});
+  updateTime(start, end, chineseVoiceName);
 };
 
 app.on('ready', () => {

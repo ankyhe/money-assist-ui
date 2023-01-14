@@ -14,8 +14,8 @@
     ipcRenderer.on('time:update', (e, timeStr) => {
       document.querySelector('#time').innerHTML = `现在时间: ${timeStr}`;
     });
-    ipcRenderer.on('timeRange:update', (e, timeRangeStr) => {
-      document.querySelector('#timeRange').innerHTML = `播报时间范围: ${timeRangeStr}`;
+    ipcRenderer.on('timeRange:update', (e, {timeRangeStr, chineseVoiceName}) => {
+      document.querySelector('#timeRange').innerHTML = `播报时间范围: ${timeRangeStr}   语音播报声音: ${chineseVoiceName}`;
     })
   </script>
 </body>
