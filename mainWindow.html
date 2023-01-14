@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>
+    Money Assist
+  </title>
+</head>
+<body>
+  <p id="timeRange">播报时间范围:</p>
+  <H1 id="time">现在时间:</H1>
+  <script>
+    const electron = require('electron');
+    const {ipcRenderer} = electron;
+    ipcRenderer.on('time:update', (e, timeStr) => {
+      document.querySelector('#time').innerHTML = `现在时间: ${timeStr}`;
+    });
+    ipcRenderer.on('timeRange:update', (e, timeRangeStr) => {
+      document.querySelector('#timeRange').innerHTML = `播报时间范围: ${timeRangeStr}`;
+    })
+  </script>
+</body>
+</html>

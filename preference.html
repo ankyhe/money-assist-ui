@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Preference</title>
+</head>
+<body>
+  <div class="container">
+    <form>
+      <div>
+        <label for="timeRange">播报时间范围</label>
+        <input type="text" id="timeRange" autofocus></input>
+      </div>
+      <button type="submit">保存</button>
+    </form>
+  </div>
+  <script>
+    const electron = require('electron');
+    const { ipcRenderer } = electron;
+    ipcRenderer.on('timeRange:update', (e, timeRangeStr) => {
+      console.log('timeRangeStr is ', timeRangeStr);
+      document.querySelector('#timeRange').value = timeRangeStr;
+    })
+
+    const form = document.querySelector('form');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const value = document.querySelector('#timeRange').value;
+      ipcRenderer.send('timeRange:updateFromUI', value);
+    });
+  </script>
+</body>
+</html>
